@@ -35,4 +35,7 @@
  * for an available CAN transmission slot */
 #define CAN_TRANSMIT_TIMEOUT 100
 
+/* The default sample rate at power up */
+#define DEFAULT_SAMPLE_RATE 50
+
 #endif /* SETTINGS_H_ */

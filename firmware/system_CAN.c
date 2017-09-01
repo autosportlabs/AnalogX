@@ -30,9 +30,12 @@
 
 #define _LOG_PFX "SYS_CAN:     "
 
-#define CAN_WORKER_STARTUP_DELAY 500
-#define ADR1_ADDRESS_PORT 0
-#define ADR2_BAUD_PORT 4
+#define CAN_WORKER_STARTUP_DELAY    500
+#define ADR1_ADDRESS_PORT           0
+#define ADR2_ADDRESS_PORT           4
+#define BAUD_RATE_PORT              2
+#define CAN_RX_CONTROL_PORT         1
+
 static uint32_t g_can_base_address = ANALOGX_CAN_BASE_ID;
 
 /*
@@ -55,7 +58,8 @@ static const CANConfig cancfg_1MB = {
 
 static const CANConfig * _select_can_configuration(void)
 {
-        return palReadPad(GPIOA, ADR2_BAUD_PORT) == PAL_HIGH ? &cancfg_1MB : &cancfg_500K;
+        palSetPadMode(GPIOA, BAUD_RATE_PORT, PAL_STM32_MODE_INPUT);
+        return palReadPad(GPIOA, BAUD_RATE_PORT) == PAL_HIGH ? &cancfg_1MB : &cancfg_500K;
 }
 
 /*
@@ -66,6 +70,10 @@ static void init_can_gpio(void)
         // Remap PA11-12 to PA9-10 for CAN
         RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;
         SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
+
+        /* Enable CAN RX path   */
+        palSetPadMode(GPIOA, CAN_RX_CONTROL_PORT, PAL_STM32_MODE_OUTPUT);
+        palClearPad(GPIOA, CAN_RX_CONTROL_PORT);
 
         /* CAN RX.       */
         palSetPadMode(GPIOA, 11, PAL_STM32_MODE_ALTERNATE | PAL_STM32_ALTERNATE(4));
@@ -87,11 +95,13 @@ static void init_can_operating_parameters(void)
 {
         /* Init CAN jumper GPIOs for determining base address offset */
         palSetPadMode(GPIOA, ADR1_ADDRESS_PORT, PAL_STM32_MODE_INPUT | PAL_STM32_PUPDR_PULLUP);
-        palSetPadMode(GPIOA, ADR2_BAUD_PORT, PAL_STM32_MODE_INPUT | PAL_STM32_PUPDR_PULLUP);
+        palSetPadMode(GPIOA, ADR2_ADDRESS_PORT, PAL_STM32_MODE_INPUT | PAL_STM32_PUPDR_PULLUP);
 
-        if (palReadPad(GPIOA, ADR1_ADDRESS_PORT) == PAL_HIGH) {
-                g_can_base_address += ANALOGX_CAN_API_RANGE;
-        }
+        uint32_t offset = 0;
+        offset |= palReadPad(GPIOA, ADR1_ADDRESS_PORT) == PAL_HIGH ? 0x01 : 0x00;
+        offset |= palReadPad(GPIOA, ADR2_ADDRESS_PORT) == PAL_HIGH ? 0x02 : 0x00;
+
+        g_can_base_address += (ANALOGX_CAN_API_RANGE * offset);
 }
 
 void system_can_init(void)
@@ -111,9 +121,6 @@ static bool dispatch_can_rx(CANRxFrame *rx_msg)
         case API_SET_CONFIG_GROUP_1:
                 api_set_config_group_1(rx_msg);
                 got_config_message = true;
-                break;
-        case API_SET_SAMPLE_RATE:
-                api_set_sample_rate(rx_msg);
                 break;
         default:
                 return false;

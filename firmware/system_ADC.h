@@ -32,5 +32,6 @@ struct ADCSamples{
 
 void system_adc_init(void);
 struct ADCSamples *  system_adc_sample(void);
+void system_adc_worker(void);
 
 #endif /* ADC_H_ */

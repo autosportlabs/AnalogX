@@ -29,15 +29,15 @@
 enum logging_levels {
         logging_level_none,
         logging_level_info,
-        logging_level_trace
+        logging_level_debug
 };
 
 #define log_info(msg, ...) if (get_logging_level() >= logging_level_info) {chprintf((BaseSequentialStream *)&SD2, "%i ", ST2MS(chVTGetSystemTimeX())); chprintf((BaseSequentialStream *)&SD2, msg, ##__VA_ARGS__);}
-#define log_trace(msg, ...) if (get_logging_level() >= logging_level_trace) {chprintf((BaseSequentialStream *)&SD2, "%i ", ST2MS(chVTGetSystemTimeX())); chprintf((BaseSequentialStream *)&SD2, msg, ##__VA_ARGS__);}
+#define log_debug(msg, ...) if (get_logging_level() >= logging_level_debug) {chprintf((BaseSequentialStream *)&SD2, "%i ", ST2MS(chVTGetSystemTimeX())); chprintf((BaseSequentialStream *)&SD2, msg, ##__VA_ARGS__);}
 
 /* Brief functions */
 #define log_info_b(msg, ...) if (get_logging_level() >= logging_level_info) {chprintf((BaseSequentialStream *)&SD2, msg, ##__VA_ARGS__);}
-#define log_trace_b(msg, ...) if (get_logging_level() >= logging_level_trace) {chprintf((BaseSequentialStream *)&SD2, msg, ##__VA_ARGS__);}
+#define log_debug_b(msg, ...) if (get_logging_level() >= logging_level_debug) {chprintf((BaseSequentialStream *)&SD2, msg, ##__VA_ARGS__);}
 
 void set_logging_level(enum logging_levels level);
 

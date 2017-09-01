@@ -28,7 +28,7 @@
 #include "system_CAN.h"
 #include "system_ADC.h"
 
-#define CAN_THREAD_STACK 512
+#define DEFAULT_STACK 512
 #define STARTUP_DEMO_THREAD_STACK 256
 #define MAIN_THREAD_SLEEP_NORMAL_MS 10000
 #define MAIN_THREAD_SLEEP_FINE_MS   1000
@@ -39,12 +39,21 @@
 /*
  * CAN receiver thread.
  */
-static THD_WORKING_AREA(can_rx_wa, CAN_THREAD_STACK);
+static THD_WORKING_AREA(can_rx_wa, DEFAULT_STACK);
+static THD_WORKING_AREA(adc_worker_wa, DEFAULT_STACK);
+
 static THD_FUNCTION(can_rx, arg)
 {
         (void)arg;
         chRegSetThreadName("CAN_worker");
         can_worker();
+}
+
+static THD_FUNCTION(adc_worker, arg)
+{
+        (void)arg;
+        chRegSetThreadName("ADC worker");
+        system_adc_worker();
 }
 
 static const WDGConfig wdgcfg = {
@@ -83,10 +92,12 @@ int main(void)
         system_adc_init();
         system_serial_init();
 
+
         /*
          * Creates the processing threads.
          */
         chThdCreateStatic(can_rx_wa, sizeof(can_rx_wa), NORMALPRIO, can_rx, NULL);
+        chThdCreateStatic(adc_worker_wa, sizeof(adc_worker_wa), NORMALPRIO, adc_worker, NULL);
 
         uint32_t stats_check = 0;
         while (true) {
@@ -96,7 +107,6 @@ int main(void)
                         broadcast_stats();
                         stats_check = 0;
                 }
-                system_adc_sample();
                 if (WATCHDOG_ENABLED)
                         wdgReset(&WDGD1);
                 check_system_state();

@@ -7,11 +7,18 @@
 
 #include "system_ADC.h"
 #include "logging.h"
+#include "system_CAN.h"
+#include "analogx_api.h"
+#include "settings.h"
+
 #define _LOG_PFX "ADC:         "
 
 #define ADC_GRP1_NUM_CHANNELS   ADC_CHANNELS
 #define ADC_GRP1_BUF_DEPTH      1
 #define SAMPLE_BUFFER_SIZE ADC_GRP1_NUM_CHANNELS * ADC_GRP1_BUF_DEPTH
+
+/* Scale 12 bits to 5.0v */
+#define ADC_SCALING 1.0 / 0.819
 
 static adcsample_t internal_samples[SAMPLE_BUFFER_SIZE] = {0};
 
@@ -75,6 +82,12 @@ void system_adc_init(void)
         log_info("adc init\r\n");
 }
 
+static uint16_t scale_0_to_5_volts(uint16_t raw_value)
+{
+    float scaled = raw_value * ADC_SCALING;
+    return (uint16_t)scaled;
+}
+
 struct ADCSamples * system_adc_sample(void)
 {
         adcStartConversion(&ADCD1, &adcgrpcfg1, internal_samples, ADC_GRP1_BUF_DEPTH);
@@ -84,9 +97,31 @@ struct ADCSamples * system_adc_sample(void)
         adc_samples.raw_samples[1] = internal_samples[2];
         adc_samples.raw_samples[2] = internal_samples[1];
         adc_samples.raw_samples[3] = internal_samples[0];
-
-        log_info("Sample ADC %d %d %d, %d\r\n", adc_samples.raw_samples[0], adc_samples.raw_samples[1], adc_samples.raw_samples[2], adc_samples.raw_samples[3]);
-
         return &adc_samples;
+}
+
+void system_adc_worker(void)
+{
+        while(!chThdShouldTerminateX()) {
+                systime_t start = chVTGetSystemTimeX();
+                struct ADCSamples * adc_samples = system_adc_sample();
+
+                CANTxFrame analog_sample;
+                prepare_can_tx_message(&analog_sample, CAN_IDE_EXT, get_can_base_id() + API_BROADCAST_SENSORS);
+
+                analog_sample.data16[0] = scale_0_to_5_volts(adc_samples->raw_samples[0]);
+                analog_sample.data16[1] = scale_0_to_5_volts(adc_samples->raw_samples[1]);
+                analog_sample.data16[2] = scale_0_to_5_volts(adc_samples->raw_samples[2]);
+                analog_sample.data16[3] = scale_0_to_5_volts(adc_samples->raw_samples[3]);
+
+                canTransmit(&CAND1, CAN_ANY_MAILBOX, &analog_sample, MS2ST(CAN_TRANSMIT_TIMEOUT));
+
+                log_debug("Sample ADC %d, %d, %d, %d\r\n", analog_sample.data16[0], analog_sample.data16[1], analog_sample.data16[2], analog_sample.data16[3]);
+
+                /* Compensate for amount of time needed for sampling and broadcasting CAN message */
+                systime_t work_time = chVTGetSystemTimeX() - start;
+
+                chThdSleep(MS2ST(1000 / get_sample_rate()) - work_time);
+        }
 }
 

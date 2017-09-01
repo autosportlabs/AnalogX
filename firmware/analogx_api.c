@@ -69,7 +69,3 @@ void api_send_announcement(void)
         log_info(_LOG_PFX "Broadcast announcement\r\n");
 }
 
-void api_set_sample_rate(CANRxFrame *rx_msg)
-{
-
-}

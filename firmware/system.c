@@ -53,10 +53,12 @@ void broadcast_stats(void)
         prepare_can_tx_message(&can_stats, CAN_IDE_EXT, get_can_base_id() + API_STATS);
 
         /* these values reserved for future use */
-        can_stats.data8[0] = MAJOR_VER;
-        can_stats.data8[1] = MINOR_VER;
-        can_stats.data8[2] = PATCH_VER;
-        can_stats.DLC = 3;
+        can_stats.data8[0] = get_sample_rate();
+
+        can_stats.data8[5] = MAJOR_VER;
+        can_stats.data8[6] = MINOR_VER;
+        can_stats.data8[7] = PATCH_VER;
+        can_stats.DLC = 8;
         canTransmit(&CAND1, CAN_ANY_MAILBOX, &can_stats, MS2ST(CAN_TRANSMIT_TIMEOUT));
         log_info(_LOG_PFX "Broadcast stats\r\n");
 }

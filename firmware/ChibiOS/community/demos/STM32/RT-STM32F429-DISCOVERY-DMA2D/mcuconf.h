@@ -65,7 +65,7 @@
 #define STM32_BKPRAM_ENABLE                 FALSE
 #define STM32_SAISRC                        STM32_SAISRC_PLL
 #define STM32_PLLSAIN_VALUE                 192
-#define STM32_PLLSAIQ_VALUE                 7
+#define STM32_PLLSAIQ_VALUE                 4
 #define STM32_PLLSAIR_VALUE                 4
 #define STM32_PLLSAIR_POST                  STM32_SAIR_DIV4
 
