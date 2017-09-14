@@ -18,7 +18,7 @@
 #define SAMPLE_BUFFER_SIZE ADC_GRP1_NUM_CHANNELS * ADC_GRP1_BUF_DEPTH
 
 /* Scale 12 bits to 5.0v */
-#define ADC_SCALING 1.0 / 0.819
+#define ADC_SCALING 1.0 / 0.8153964
 
 static adcsample_t internal_samples[SAMPLE_BUFFER_SIZE] = {0};
 
