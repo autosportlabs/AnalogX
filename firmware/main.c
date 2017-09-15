@@ -1,7 +1,7 @@
 /*
- * ShiftX2 firmware
+ * AnalogX firmware
  *
- * Copyright (C) 2016 Autosport Labs
+ * Copyright (C) 2017 Autosport Labs
  *
  * This file is part of the Race Capture firmware suite
  *
@@ -18,7 +18,6 @@
  * have received a copy of the GNU General Public License along with
  * this code. If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "ch.h"
 #include "hal.h"
 #include "settings.h"

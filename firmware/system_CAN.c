@@ -1,7 +1,7 @@
 /*
- * OBD2CAN firmware
+ * AnalogX firmware
  *
- * Copyright (C) 2016 Autosport Labs
+ * Copyright (C) 2017 Autosport Labs
  *
  * This file is part of the Race Capture firmware suite
  *
@@ -18,7 +18,6 @@
  * have received a copy of the GNU General Public License along with
  * this code. If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "system_CAN.h"
 
 #include "analogx_api.h"
