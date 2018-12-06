@@ -57,8 +57,7 @@ static const CANConfig cancfg_1MB = {
 
 static void _spin_wait(void)
 {
-        uint32_t i;
-        for (i = 0; i < 100000; i++) {
+        for (uint32_t i = 0; i < 100000; i++) {
                 asm("");
         }
 }
