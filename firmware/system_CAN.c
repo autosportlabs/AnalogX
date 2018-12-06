@@ -158,13 +158,13 @@ void can_worker(void)
         log_info(_LOG_PFX "CAN base address: %u\r\n", g_can_base_address);
 
         if (g_selected_can_config == &cancfg_500K) {
-                log_info(_LOG_PFX "CAN base address: 500K\r\n");
+                log_info(_LOG_PFX "CAN baud: 500K\r\n");
         }
         else if (g_selected_can_config == &cancfg_1MB) {
-                log_info(_LOG_PFX "CAN base address: 1MB\r\n");
+                log_info(_LOG_PFX "CAN baud: 1MB\r\n");
         }
         else {
-                log_info(_LOG_PFX "CAN base address: unknown / invalid\r\n");
+                log_info(_LOG_PFX "CAN baud: unknown / invalid\r\n");
         }
 
         api_send_announcement();
