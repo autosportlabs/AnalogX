@@ -93,7 +93,6 @@ void system_adc_init(void)
 
         //  adcSTM32SetCCR(ADC_CCR_VBATEN | ADC_CCR_TSEN | ADC_CCR_VREFEN);
         /* start continuous conversion */
-        log_info("adc init\r\n");
 }
 
 static uint16_t scale_0_to_5_volts(uint16_t raw_value)

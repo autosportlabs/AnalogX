@@ -91,6 +91,7 @@ int main(void)
         system_adc_init();
         system_serial_init();
 
+        log_info("===AnalogX START (Version %u.%u.%u)===\r\n", MAJOR_VER, MINOR_VER, PATCH_VER);
 
         /*
          * Creates the processing threads.

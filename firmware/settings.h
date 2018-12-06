@@ -24,7 +24,7 @@
 
 #define MAJOR_VER 1
 #define MINOR_VER 0
-#define PATCH_VER 0
+#define PATCH_VER 1
 
 #define SETTINGS_CHANNEL_COUNT 9
 

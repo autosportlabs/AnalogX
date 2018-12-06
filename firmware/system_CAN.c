@@ -36,7 +36,7 @@
 #define CAN_RX_CONTROL_PORT         1
 
 static uint32_t g_can_base_address = ANALOGX_CAN_BASE_ID;
-
+static const CANConfig * g_selected_can_config = NULL;
 /*
  * 500K baud; 36MHz clock
  */
@@ -55,9 +55,18 @@ static const CANConfig cancfg_1MB = {
         CAN_BTR_TS1(11) | CAN_BTR_TS2(2) | CAN_BTR_BRP(2)
 };
 
+static void _spin_wait(void)
+{
+        uint32_t i;
+        for (i = 0; i < 100000; i++) {
+                asm("");
+        }
+}
+
 static const CANConfig * _select_can_configuration(void)
 {
-        palSetPadMode(GPIOA, BAUD_RATE_PORT, PAL_STM32_MODE_INPUT);
+        palSetPadMode(GPIOA, BAUD_RATE_PORT, PAL_STM32_MODE_INPUT | PAL_STM32_PUPDR_PULLUP);
+        _spin_wait();
         return palReadPad(GPIOA, BAUD_RATE_PORT) == PAL_HIGH ? &cancfg_1MB : &cancfg_500K;
 }
 
@@ -80,7 +89,7 @@ static void init_can_gpio(void)
         palSetPadMode(GPIOA, 12, PAL_STM32_MODE_ALTERNATE | PAL_STM32_ALTERNATE(4));
 
         /* Activates the CAN driver */
-        canStart(&CAND1, _select_can_configuration());
+        canStart(&CAND1, g_selected_can_config);
 
         // Disable CAN filtering for now until we can verify proper operation / settings.
         // CANFilter shiftx2_can_filter = {1, 0, 1, 0, 0x000E3700, 0x1FFFFF00}; // g_can_base_address, ANALOGX_CAN_FILTER_MASK
@@ -95,12 +104,15 @@ static void init_can_operating_parameters(void)
         /* Init CAN jumper GPIOs for determining base address offset */
         palSetPadMode(GPIOA, ADR1_ADDRESS_PORT, PAL_STM32_MODE_INPUT | PAL_STM32_PUPDR_PULLUP);
         palSetPadMode(GPIOA, ADR2_ADDRESS_PORT, PAL_STM32_MODE_INPUT | PAL_STM32_PUPDR_PULLUP);
+        _spin_wait();
 
         uint32_t offset = 0;
         offset |= palReadPad(GPIOA, ADR1_ADDRESS_PORT) == PAL_HIGH ? 0x01 : 0x00;
         offset |= palReadPad(GPIOA, ADR2_ADDRESS_PORT) == PAL_HIGH ? 0x02 : 0x00;
 
         g_can_base_address += (ANALOGX_CAN_API_RANGE * offset);
+
+        g_selected_can_config = _select_can_configuration();
 }
 
 void system_can_init(void)
@@ -146,8 +158,17 @@ void can_worker(void)
         chThdSleepMilliseconds(CAN_WORKER_STARTUP_DELAY);
         log_info(_LOG_PFX "CAN base address: %u\r\n", g_can_base_address);
 
-        api_send_announcement();
+        if (g_selected_can_config == &cancfg_500K) {
+                log_info(_LOG_PFX "CAN base address: 500K\r\n");
+        }
+        else if (g_selected_can_config == &cancfg_1MB) {
+                log_info(_LOG_PFX "CAN base address: 1MB\r\n");
+        }
+        else {
+                log_info(_LOG_PFX "CAN base address: unknown / invalid\r\n");
+        }
 
+        api_send_announcement();
 
         while(!chThdShouldTerminateX()) {
 
