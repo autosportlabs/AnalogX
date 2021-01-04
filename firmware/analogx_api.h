@@ -25,16 +25,10 @@
 #include "hal.h"
 #include "system_CAN.h"
 
-struct ConfigGroup1 {
-        uint8_t update_rate_hz;
-};
-
 /* API offsets */
-#define ANALOGX_CAN_BASE_ID                 0xE4600
+#define ANALOGX_CAN_BASE_ID                 0xE5000
 #define ANALOGX_CAN_API_RANGE               256
 #define ANALOGx_CAN_FILTER_MASK             0x1FFFFF00
-
-#define ANALOGX_DEFAULT_SAMPLE_RATE         DEFAULT_SAMPLE_RATE
 
 /* Configuration and Runtime */
 
@@ -42,17 +36,24 @@ struct ConfigGroup1 {
 #define API_RESET_DEVICE                    1
 #define API_STATS                           2
 #define API_SET_CONFIG_GROUP_1              3
-
+/* Broadcast sensor state */
 #define API_BROADCAST_SENSORS               20
+
+/* Message data sizes */
+#define API_ANNOUNCEMENT_SIZE               8
+#define API_RESET_DEVICE_SIZE               0
+#define API_STATS_SIZE                      8
+#define API_SET_CONFIG_GROUP_1_SIZE         1
+#define API_BROADCAST_SENSORS_SIZE          8
 
 /* Base API functions */
 bool api_is_provisoned(void);
 void set_api_is_provisioned(bool);
 void api_initialize(void);
+void api_reset(void);
 void api_set_config_group_1(CANRxFrame *rx_msg);
 
 uint8_t get_sample_rate(void);
-void set_sample_rate(uint8_t sample_rate);
 
 void api_send_announcement(void);
 

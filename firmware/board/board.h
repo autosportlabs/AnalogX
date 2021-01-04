@@ -52,7 +52,8 @@
 /*
  * MCU type as defined in the ST header.
  */
-#define STM32F042x6
+/* #define STM32F042x6 */
+/* Defined in makefile, confused because this should be STM32F072xB */
 
 /*
  * IO pins assignments.

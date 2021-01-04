@@ -1,5 +1,5 @@
 /*
- * AnalogX firmware
+ * RaceCapture/Pro stimulator firmware
  *
  * Copyright (C) 2017 Autosport Labs
  *
@@ -19,23 +19,28 @@
  * this code. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SETTINGS_H_
-#define SETTINGS_H_
+#ifndef SYSTEM_CONFIG_H_
+#define SYSTEM_CONFIG_H_
+#include "ch.h"
+#include "hal.h"
+#include "settings.h"
 
-#define MAJOR_VER 1
-#define MINOR_VER 0
-#define PATCH_VER 0
+typedef struct _VersionInfo {
+        uint32_t major;
+        uint32_t minor;
+        uint32_t patch;
+} VersionInfo;
 
-#define SETTINGS_CHANNEL_COUNT 9
+typedef struct _ConfigGroup1 {
+        uint8_t sample_rate_hz;
+} ConfigGroup1;
 
-/* how long we wait before resetting the system */
-#define SYSTEM_RESET_DELAY 10
+typedef struct _Configuration {
+        VersionInfo version_info;
+        ConfigGroup1 group_1;
+} Configuration;
 
-/* The timeout value while we wait
- * for an available CAN transmission slot */
-#define CAN_TRANSMIT_TIMEOUT 100
-
-/* The default sample rate at power up */
-#define DEFAULT_SAMPLE_RATE 50
-
-#endif /* SETTINGS_H_ */
+void init_configuration(void);
+Configuration * get_config(void);
+void check_flash_configuration(void);
+#endif /* SYSTEM_CONFIG_H_ */

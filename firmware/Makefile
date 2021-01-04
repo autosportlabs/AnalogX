@@ -29,7 +29,7 @@ endif
 
 # C specific options here (added to USE_OPT).
 ifeq ($(USE_COPT),)
-  USE_COPT = 
+  USE_COPT =
 endif
 
 # C++ specific options here (added to USE_OPT).
@@ -44,7 +44,7 @@ endif
 
 # Linker extra options here.
 ifeq ($(USE_LDOPT),)
-  USE_LDOPT = 
+  USE_LDOPT =
 endif
 
 # Enable this if you want link time optimizations (LTO)
@@ -101,6 +101,11 @@ PROJECT = main
 
 # Imported source files and paths
 CHIBIOS = ./ChibiOS/
+CONFDIR  := ./cfg
+BUILDDIR := ./build
+DEPDIR   := ./.dep
+UTILDIR  := util
+
 # Startup files.
 include $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC/mk/startup_stm32f0xx.mk
 # HAL-OSAL files (optional).
@@ -121,7 +126,11 @@ STREAMSSRC = 	$(CHIBIOS)/os/hal/lib/streams/chprintf.c \
 STREAMSINC = $(CHIBIOS)/os/hal/lib/streams
 
 # Define linker script file here
-LDSCRIPT= $(STARTUPLD)/STM32F072xB.ld
+LDSCRIPT= ./ld/STM32F072xB.ld
+
+CMSISINC = Libraries/STM32F0xx_StdPeriph_Driver/inc
+
+CMSISCRC = Libraries/STM32F0xx_StdPeriph_Driver/src/stm32f0xx_flash.c
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -134,11 +143,14 @@ CSRC = $(STARTUPSRC) \
        $(BOARDSRC) \
        $(TESTSRC) \
        $(STREAMSSRC) \
+       $(CMSISCRC) \
        util/modp_numtoa.c \
+       util/memory_util.c \
        system.c \
        system_serial.c \
        main.c \
        system_CAN.c \
+       systen_config.c \
        analogx_api.c \
        system_ADC.c \
        logging.c
@@ -172,7 +184,8 @@ ASMSRC = $(STARTUPASM) $(PORTASM) $(OSALASM)
 
 INCDIR = $(STARTUPINC) $(KERNINC) $(PORTINC) $(OSALINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) $(TESTINC) \
-         $(STREAMSINC) $(CHIBIOS)/os/various util
+         $(STREAMSINC) $(CHIBIOS)/os/various util \
+         $(UTILDIR) $(CMSISINC)
 
 #
 # Project, sources and paths
@@ -222,7 +235,7 @@ CPPWARN = -Wall -Wextra -Wundef
 #
 
 # List all user C define here, like -D_DEBUG=1
-UDEFS =
+UDEFS =  -DSTM32F072xB
 
 # Define ASM defines here
 UADEFS =

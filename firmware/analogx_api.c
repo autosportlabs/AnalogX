@@ -20,13 +20,12 @@
  */
 #include "analogx_api.h"
 
+#include "system_config.h"
 #include "logging.h"
 #include "settings.h"
 #include "ch.h"
 #include "hal.h"
 #define _LOG_PFX "API:         "
-
-static struct ConfigGroup1 g_config_group_1 = {ANALOGX_DEFAULT_SAMPLE_RATE};
 
 static bool g_provisioned = false;
 
@@ -45,25 +44,28 @@ void api_initialize(void)
         /* NOOP */
 }
 
+void api_reset(void)
+{
+        NVIC_SystemReset();
+}
+
 void api_set_config_group_1(CANRxFrame *rx_msg)
 {
-        if (rx_msg->DLC < 1) {
+        if (rx_msg->DLC < API_SET_CONFIG_GROUP_1_SIZE) {
                 log_info(_LOG_PFX "Invalid params for set config group 1\r\n");
                 return;
         }
-        uint8_t sample_rate = rx_msg->data8[0];
 
-        set_sample_rate(sample_rate);
+        ConfigGroup1 *config_group_1 = &get_config()->group_1;
+
+        config_group_1->sample_rate_hz = rx_msg->data8[0];
+
+        check_flash_configuration();
 }
 
 uint8_t get_sample_rate(void)
 {
-        return g_config_group_1.update_rate_hz;
-}
-
-void set_sample_rate(uint8_t sample_rate)
-{
-        g_config_group_1.update_rate_hz = sample_rate;
+        return get_config()->group_1.sample_rate_hz;
 }
 
 void api_send_announcement(void)
@@ -78,7 +80,7 @@ void api_send_announcement(void)
         announce.data8[5] = MAJOR_VER;
         announce.data8[6] = MINOR_VER;
         announce.data8[7] = PATCH_VER;
-        announce.DLC = 8;
+        announce.DLC = API_ANNOUNCEMENT_SIZE;
         canTransmit(&CAND1, CAN_ANY_MAILBOX, &announce, MS2ST(CAN_TRANSMIT_TIMEOUT));
         log_info(_LOG_PFX "Broadcast announcement\r\n");
 }

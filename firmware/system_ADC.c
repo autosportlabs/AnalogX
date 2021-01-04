@@ -20,6 +20,7 @@
  */
 
 #include "system_ADC.h"
+#include "system_config.h"
 #include "logging.h"
 #include "system_CAN.h"
 #include "analogx_api.h"
@@ -115,6 +116,8 @@ struct ADCSamples * system_adc_sample(void)
 
 void system_adc_worker(void)
 {
+        init_configuration();
+
         while(!chThdShouldTerminateX()) {
                 systime_t start = chVTGetSystemTimeX();
                 struct ADCSamples * adc_samples = system_adc_sample();

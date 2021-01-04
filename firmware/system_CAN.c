@@ -25,7 +25,7 @@
 #include "system_serial.h"
 #include "settings.h"
 #include "system.h"
-#include "stm32f042x6.h"
+#include "stm32f072xb.h"
 
 #define _LOG_PFX "SYS_CAN:     "
 
@@ -128,6 +128,9 @@ static bool dispatch_can_rx(CANRxFrame *rx_msg)
         int32_t can_id = rx_msg->IDE == CAN_IDE_EXT ? rx_msg->EID : rx_msg->SID;
         bool got_config_message = false;
         switch (can_id - g_can_base_address) {
+        case API_RESET_DEVICE:
+                api_reset();
+                break;
         case API_SET_CONFIG_GROUP_1:
                 api_set_config_group_1(rx_msg);
                 got_config_message = true;
