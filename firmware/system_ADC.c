@@ -97,8 +97,8 @@ void system_adc_init(void)
 
 static uint16_t scale_0_to_5_volts(uint16_t raw_value)
 {
-    float scaled = raw_value * ADC_SCALING;
-    return (uint16_t)scaled;
+        float scaled = raw_value * ADC_SCALING;
+        return (uint16_t)scaled;
 }
 
 struct ADCSamples * system_adc_sample(void)

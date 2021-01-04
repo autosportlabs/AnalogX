@@ -159,11 +159,9 @@ void can_worker(void)
 
         if (g_selected_can_config == &cancfg_500K) {
                 log_info(_LOG_PFX "CAN baud: 500K\r\n");
-        }
-        else if (g_selected_can_config == &cancfg_1MB) {
+        } else if (g_selected_can_config == &cancfg_1MB) {
                 log_info(_LOG_PFX "CAN baud: 1MB\r\n");
-        }
-        else {
+        } else {
                 log_info(_LOG_PFX "CAN baud: unknown / invalid\r\n");
         }
 

@@ -25,7 +25,7 @@
 #include "hal.h"
 
 #define ADC_CHANNELS 4
-struct ADCSamples{
+struct ADCSamples {
         uint16_t raw_samples[ADC_CHANNELS];
 };
 
